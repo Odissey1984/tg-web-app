@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заявка на карты</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+    .card-block { border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); }
+    label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
+    input, select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+    .checkbox-group label { font-weight: normal; font-size: 13px; margin-top: 0; }
+    .btn { background: #2481cc; color: white; padding: 10px; border: none; border-radius: 6px; width: 100%; font-size: 15px; cursor: pointer; margin-top: 10px; }
+    .btn-add { background: #4caf50; }
+  </style>
+</head>
+<body>
+  <h2>Формирование запроса</h2>
+  <form id="mainForm">
+    <div id="requestsContainer"></div>
+    <button type="button" class="btn btn-add" onclick="addRequestBlock()">+ Добавить перевозчика</button>
+    <button type="submit" class="btn" style="margin-top: 20px;">СТАРТ</button>
+  </form>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    function addRequestBlock() {
+      const container = document.getElementById('requestsContainer');
+      const blockId = Date.now();
+      const html = `
+        <div class="card-block" id="block_${blockId}">
+          <label>ФИО Перевозчика:</label>
+          <input type="text" class="carrier" required placeholder="Например: Пупкин И.В.">
+          
+          <label>Запрашиваемая сумма (грн):</label>
+          <input type="number" class="amount" required placeholder="27400">
+          
+          <label>Допустимое кол-во карт:</label>
+          <input type="number" class="max_cards" value="3" min="1" max="10" required>
+
+          <label>Выберите банки:</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" class="bank" value="Любой" checked> Любой</label>
+            <label><input type="checkbox" class="bank" value="Приват"> Приват</label>
+            <label><input type="checkbox" class="bank" value="Моно"> Моно</label>
+            <label><input type="checkbox" class="bank" value="ПУМБ"> ПУМБ</label>
+            <label><input type="checkbox" class="bank" value="А-Банк"> А-Банк</label>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', html);
+    }
+
+    // Добавляем первый блок при загрузке
+    addRequestBlock();
+
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const blocks = document.querySelectorAll('.card-block');
+      const data = [];
+
+      blocks.forEach(block => {
+        const carrier = block.querySelector('.carrier').value;
+        const amount = parseInt(block.querySelector('.amount').value);
+        const max_cards = parseInt(block.querySelector('.max_cards').value);
+        
+        const banks = [];
+        block.querySelectorAll('.bank:checked').forEach(cb => banks.push(cb.value));
+
+        data.push({ carrier, amount, max_cards, banks });
+      });
+
+      // Отправка данных боту в JSON
+      tg.sendData(JSON.stringify(data));
+    });
+  </script>
+</body>
+</html>
