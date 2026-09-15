@@ -8,26 +8,34 @@
   <style>
     body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
     .card-block { border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); }
+    .bin-block { border: 2px dashed #4caf50; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: #e8f5e9; } /* Отличаемый стиль для банка */
     label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
     input, select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
     .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
     .checkbox-group label { font-weight: normal; font-size: 13px; margin-top: 0; }
     .btn { background: #2481cc; color: white; padding: 10px; border: none; border-radius: 6px; width: 100%; font-size: 15px; cursor: pointer; margin-top: 10px; }
     .btn-add { background: #4caf50; }
+    .btn-save-bin { background: #ff9800; } /* Оранжевая кнопка для банка */
   </style>
 </head>
 <body>
-  <h2>Формирование запроса</h2>
+  <h2 style="margin-bottom: 20px;">Формирование запроса</h2>
   <form id="mainForm">
     <div id="requestsContainer"></div>
     <button type="button" class="btn btn-add" onclick="addRequestBlock()">+ Добавить перевозчика</button>
-    <button type="submit" class="btn" style="margin-top: 20px;">СТАРТ</button>
+    <hr>
+    <h3 style="margin-top: 20px;">Добавить новый банк</h3>
+    <div id="binsContainer"></div>
+    <button type="button" class="btn btn-add" onclick="addBinBlock()">+ Добавить банк в базу</button>
+    
+    <button type="submit" class="btn" style="margin-top: 40px; background: #2e7d32;">ОТПРАВИТЬ ЗАЯВКУ (СТАРТ)</button>
   </form>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    // Функция добавления блока перевозчика
     function addRequestBlock() {
       const container = document.getElementById('requestsContainer');
       const blockId = Date.now();
@@ -48,14 +56,50 @@
             <label><input type="checkbox" class="bank" value="Приват"> Приват</label>
             <label><input type="checkbox" class="bank" value="Моно"> Моно</label>
             <label><input type="checkbox" class="bank" value="ПУМБ"> ПУМБ</label>
-            <label><input type="checkbox" class="bank" value="Райфайзен"> Райфайзен</label>
+            <label><input type="checkbox" class="bank" value="Райфайзен"> Райффайзен</label>
           </div>
         </div>
       `;
       container.insertAdjacentHTML('beforeend', html);
     }
 
-    // Добавляем первый блок при загрузке
+    // Функция добавления блока нового банка
+    function addBinBlock() {
+      const container = document.getElementById('binsContainer');
+      const blockId = Date.now();
+      const html = `
+        <div class="bin-block" id="bin_block_${blockId}">
+          <label>BIN (первые 6 цифр):</label>
+          <input type="text" class="new_bin" placeholder="Например: 444111" maxlength="6">
+          
+          <label>Название банка:</label>
+          <input type="text" class="new_bank_name" placeholder="Например: Моно">
+          
+          <button type="button" class="btn btn-save-bin" onclick="saveNewBin(${blockId})">Сохранить в базу</button>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', html);
+    }
+
+    // Функция отправки только банка
+    function saveNewBin(blockId) {
+      const block = document.getElementById(`bin_block_${blockId}`);
+      const bin = block.querySelector('.new_bin').value;
+      const name = block.querySelector('.new_bank_name').value;
+
+      if (bin && name) {
+        // Отправляем специальный JSON для добавления банка
+        tg.sendData(JSON.stringify({
+          action: "add_bin",
+          bin: bin,
+          bank: name
+        }));
+      } else {
+        alert("Заполните оба поля!");
+      }
+    }
+
+    // Добавляем первый блок перевозчика при загрузке
     addRequestBlock();
 
     document.getElementById('mainForm').addEventListener('submit', function(e) {
@@ -74,8 +118,11 @@
         data.push({ carrier, amount, max_cards, banks });
       });
 
-      // Отправка данных боту в JSON
-      tg.sendData(JSON.stringify(data));
+      // Отправляем данные заявки
+      tg.sendData(JSON.stringify({
+        action: "request",
+        data: data
+      }));
     });
   </script>
 </body>
