@@ -4,6 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FuelLogix 2</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+        .button-block { margin-bottom: 15px; }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
+        input[type="text"] { margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="button-block">
+        <button onclick="uploadOkko()">Upload Okko File</button>
+    </div>
+    <div class="button-block">
+        <button onclick="uploadUkrnafta()">Upload Ukrnafta File</button>
+    </div>
+    <div class="button-block">
+        <label for="carrierToDelete">Delete Carrier:</label>
+        <input type="text" id="carrierToDelete" placeholder="Enter carrier name">
+        <button onclick="deleteCarrier(document.getElementById('carrierToDelete').value)">Delete</button>
+    </div>
+    <div class="button-block">
+        <label for="carrierToMove">Move Carrier:</label>
+        <input type="text" id="carrierToMove" placeholder="Enter carrier name">
+        <select id="newSheetName">
+            <option value="TENT">TENT</option>
+            <option value="ZERNO">ZERNO</option>
+        </select>
+        <button onclick="moveCarrier(document.getElementById('carrierToMove').value, document.getElementById('newSheetName').value)">Move</button>
+    </div>
+
     <script>
         function sendData(action, data) {
             window.Telegram.WebApp.sendData(JSON.stringify({action, ...data}));
@@ -25,24 +55,5 @@
             sendData('move', {carrier, new_sheet_name: newSheet});
         }
     </script>
-</head>
-<body>
-    <h1>FuelLogix 2</h1>
-    <button onclick="uploadOkko()">Upload Okko File</button>
-    <button onclick="uploadUkrnafta()">Upload Ukrnafta File</button>
-    <div>
-        <h2>Delete Carrier</h2>
-        <input type="text" id="carrierToDelete" placeholder="Enter carrier name">
-        <button onclick="deleteCarrier(document.getElementById('carrierToDelete').value)">Delete</button>
-    </div>
-    <div>
-        <h2>Move Carrier</h2>
-        <input type="text" id="carrierToMove" placeholder="Enter carrier name">
-        <select id="newSheetName">
-            <option value="TENT">TENT</option>
-            <option value="ZERNO">ZERNO</option>
-        </select>
-        <button onclick="moveCarrier(document.getElementById('carrierToMove').value, document.getElementById('newSheetName').value)">Move</button>
-    </div>
 </body>
 </html>
