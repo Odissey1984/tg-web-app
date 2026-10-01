@@ -9,15 +9,16 @@
     body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
     .button-block { margin-bottom: 15px; }
     label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
-    input[type="file"] { margin-top: 8px; }
+    input[type="text"] { margin-top: 8px; padding: 5px; width: calc(100% - 20px); box-sizing: border-box; }
+    button { padding: 5px 10px; }
   </style>
 </head>
 <body>
   <div class="button-block">
-    <button onclick="Telegram.WebApp.openWebApp({url: 'https://odissey1984.github.io/tg-web-app/fuellogix2.html?file=okko'})">Добавить файл Окко</button>
+    <button onclick="uploadFile('okko')">Добавить файл Окко</button>
   </div>
   <div class="button-block">
-    <button onclick="Telegram.WebApp.openWebApp({url: 'https://odissey1984.github.io/tg-web-app/fuellogix2.html?file=ukrnafta'})">Добавить файл Укрнафта</button>
+    <button onclick="uploadFile('ukrnafta')">Добавить файл Укрнафта</button>
   </div>
   <div class="button-block">
     <label for="carrier">ФИО перевозчика:</label>
@@ -26,28 +27,33 @@
   </div>
 
   <script>
-    function uploadFile(source) {
-      tg.MainButton.setText(`Загрузить файл ${source}`);
-      tg.MainButton.show();
-      tg.MainButton.onClick(() => {
-        tg.sendData(JSON.stringify({
-          action: "upload",
-          source: source
-        }));
-      });
-    }
+    window.onload = function() {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
 
-    function deleteCarrier() {
-      const carrier = document.getElementById('carrier').value;
-      if (carrier) {
-        tg.sendData(JSON.stringify({
-          action: "delete",
-          carrier: carrier
-        }));
-      } else {
-        alert("Введите ФИО перевозчика");
+      function uploadFile(source) {
+        tg.MainButton.setText(`Загрузить файл ${source}`);
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => {
+          tg.sendData(JSON.stringify({
+            action: "upload",
+            source: source
+          }));
+        });
       }
-    }
+
+      function deleteCarrier() {
+        const carrier = document.getElementById('carrier').value;
+        if (carrier) {
+          tg.sendData(JSON.stringify({
+            action: "delete",
+            carrier: carrier
+          }));
+        } else {
+          alert("Введите ФИО перевозчика");
+        }
+      }
+    };
   </script>
 </body>
 </html>
