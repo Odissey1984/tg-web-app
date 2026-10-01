@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FuelLogix 2</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+    .button-block { margin-bottom: 15px; }
+    label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
+    input[type="file"] { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="button-block">
+    <button onclick="uploadFile('okko')">Добавить файл Окко</button>
+  </div>
+  <div class="button-block">
+    <button onclick="uploadFile('ukrnafta')">Добавить файл Укрнафта</button>
+  </div>
+  <div class="button-block">
+    <label for="carrier">ФИО перевозчика:</label>
+    <input type="text" id="carrier" placeholder="Введите ФИО перевозчика">
+    <button onclick="deleteCarrier()">Удалить перевозчика</button>
+  </div>
+
+  <script>
+    function uploadFile(source) {
+      tg.MainButton.setText(`Загрузить файл ${source}`);
+      tg.MainButton.show();
+      tg.MainButton.onClick(() => {
+        tg.sendData(JSON.stringify({
+          action: "upload",
+          source: source
+        }));
+      });
+    }
+
+    function deleteCarrier() {
+      const carrier = document.getElementById('carrier').value;
+      if (carrier) {
+        tg.sendData(JSON.stringify({
+          action: "delete",
+          carrier: carrier
+        }));
+      } else {
+        alert("Введите ФИО перевозчика");
+      }
+    }
+  </script>
+</body>
+</html>
