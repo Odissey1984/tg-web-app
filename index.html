@@ -99,6 +99,21 @@
       }
     }
 
+    // «Любой» и конкретные банки взаимоисключающие: выбрали банк - «Любой» снимается,
+    // выбрали «Любой» - банки снимаются, ничего не выбрано - возвращается «Любой»
+    document.getElementById('requestsContainer').addEventListener('change', function(e) {
+      if (!e.target.classList.contains('bank')) return;
+      const group = e.target.closest('.checkbox-group');
+      const any = group.querySelector('.bank[value="Любой"]');
+      const others = group.querySelectorAll('.bank:not([value="Любой"])');
+      if (e.target === any) {
+        if (any.checked) others.forEach(cb => cb.checked = false);
+      } else if (e.target.checked) {
+        any.checked = false;
+      }
+      if (!any.checked && !Array.from(others).some(cb => cb.checked)) any.checked = true;
+    });
+
     // Добавляем первый блок перевозчика при загрузке
     addRequestBlock();
 
