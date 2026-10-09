@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сверка карт</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+    .block { border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); }
+    label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
+    input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+    .period { margin-top: 12px; font-size: 18px; font-weight: bold; text-align: center; }
+    .hint { margin-top: 8px; font-size: 13px; opacity: 0.7; }
+    .btn { background: #2e7d32; color: white; padding: 12px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2 style="margin-bottom: 20px;">Сверка выданных карт</h2>
+  <div class="block">
+    <label for="anyDate">Выберите любую дату нужной недели:</label>
+    <input type="date" id="anyDate">
+    <div class="period" id="periodText"></div>
+    <div class="hint">Период всегда неделя: понедельник - воскресенье. После нажатия бот попросит прислать Excel-файл с картами.</div>
+  </div>
+  <button type="button" class="btn" id="startBtn">СВЕРКА</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const input = document.getElementById('anyDate');
+    const periodText = document.getElementById('periodText');
+    let weekStart = null, weekEnd = null;
+
+    function iso(d) {
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+    }
+    function fmt(d) {
+      const p = n => String(n).padStart(2, '0');
+      return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear();
+    }
+    function update() {
+      if (!input.value) { weekStart = weekEnd = null; periodText.textContent = ''; return; }
+      const [y, m, d] = input.value.split('-').map(Number);
+      const day = new Date(y, m - 1, d);
+      const offset = (day.getDay() + 6) % 7;            // 0 = понедельник
+      weekStart = new Date(y, m - 1, d - offset);
+      weekEnd = new Date(y, m - 1, d - offset + 6);
+      periodText.textContent = fmt(weekStart) + ' - ' + fmt(weekEnd);
+    }
+
+    // по умолчанию - прошлая неделя
+    const today = new Date();
+    input.value = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7));
+    update();
+    input.addEventListener('change', update);
+
+    document.getElementById('startBtn').addEventListener('click', function() {
+      if (!weekStart) { alert('Выберите дату'); return; }
+      tg.sendData(JSON.stringify({
+        action: "recon_period",
+        start: iso(weekStart),
+        end: iso(weekEnd)
+      }));
+    });
+  </script>
+</body>
+</html>
