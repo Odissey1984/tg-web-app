@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЗП</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 15px; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+    .block { border: 1px solid #ccc; padding: 12px; border-radius: 8px; margin-bottom: 15px; background: var(--tg-theme-secondary-bg-color, #f9f9f9); }
+    label { display: block; margin-top: 8px; font-weight: bold; font-size: 14px; }
+    select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+    .btn { background: #2481cc; color: white; padding: 14px; border: none; border-radius: 6px; width: 100%; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .hint { margin-top: 8px; font-size: 13px; opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <h2 style="margin-bottom: 20px;">ЗП: литры и сумма за месяц</h2>
+  <div class="block">
+    <label for="month">Месяц:</label>
+    <select id="month"></select>
+    <label for="year">Год:</label>
+    <select id="year"></select>
+    <div class="hint">Выберите период, затем нажмите нужный раздел. Итоги придут в канал ЗП.</div>
+  </div>
+
+  <button type="button" class="btn" data-section="Neptune">Neptune</button>
+  <button type="button" class="btn" data-section="TENT" style="background: #4caf50;">TENT</button>
+  <button type="button" class="btn" data-section="ZERNO" style="background: #ff9800;">ZERNO</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    const monthSel = document.getElementById('month');
+    const yearSel = document.getElementById('year');
+
+    months.forEach((name, i) => monthSel.add(new Option(name, i + 1)));
+    const now = new Date();
+    for (let y = now.getFullYear(); y >= now.getFullYear() - 3; y--) yearSel.add(new Option(y, y));
+
+    // по умолчанию - прошлый месяц
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    monthSel.value = prev.getMonth() + 1;
+    yearSel.value = prev.getFullYear();
+
+    document.querySelectorAll('button[data-section]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tg.sendData(JSON.stringify({
+          action: 'zp',
+          section: btn.dataset.section,
+          year: Number(yearSel.value),
+          month: Number(monthSel.value)
+        }));
+      });
+    });
+  </script>
+</body>
+</html>

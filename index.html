@@ -23,12 +23,19 @@
   <form id="mainForm">
     <div id="requestsContainer"></div>
     <button type="button" class="btn btn-add" onclick="addRequestBlock()">+ Добавить перевозчика</button>
-    <hr>
-    <h3 style="margin-top: 20px;">Добавить новый банк</h3>
-    <div id="binsContainer"></div>
-    <button type="button" class="btn btn-add" onclick="addBinBlock()">+ Добавить банк в базу</button>
-    
-    <button type="submit" class="btn" style="margin-top: 40px; background: #2e7d32;">ОТПРАВИТЬ ЗАЯВКУ (СТАРТ)</button>
+    <button type="button" class="btn" style="background: #0097a7;" onclick="tg.sendData(JSON.stringify({action: 'balance'}))">Баланс</button>
+
+    <button type="submit" class="btn" style="margin-top: 40px; background: #2e7d32;">ОТПРАВИТЬ ЗАЯВКУ</button>
+
+    <!-- Добавление нового банка спрятано: раскрывается маленькой кнопкой -->
+    <div style="text-align: right; margin-top: 25px;">
+      <button type="button" id="binToggle" title="Добавить новый банк" onclick="toggleBinMenu()"
+        style="background: none; border: 1px solid #ccc; border-radius: 6px; padding: 4px 10px; font-size: 13px; cursor: pointer; color: inherit;">⚙ Новый банк</button>
+    </div>
+    <div id="binMenu" style="display: none; margin-top: 10px;">
+      <h3>Добавить новый банк</h3>
+      <div id="binsContainer"></div>
+    </div>
   </form>
 
   <script>
@@ -79,6 +86,14 @@
         </div>
       `;
       container.insertAdjacentHTML('beforeend', html);
+    }
+
+    // Раскрывает/прячет меню добавления банка; при первом раскрытии сразу создаёт поля
+    function toggleBinMenu() {
+      const menu = document.getElementById('binMenu');
+      const open = menu.style.display === 'none';
+      menu.style.display = open ? 'block' : 'none';
+      if (open && !document.querySelector('.bin-block')) addBinBlock();
     }
 
     // Функция отправки только банка
